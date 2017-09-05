@@ -75,12 +75,14 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	Ω(versionedBucketName).ShouldNot(BeEmpty(), "must specify $S3_VERSIONED_TESTING_BUCKET")
 	Ω(bucketName).ShouldNot(BeEmpty(), "must specify $S3_TESTING_BUCKET")
 	Ω(regionName).ShouldNot(BeEmpty(), "must specify $S3_TESTING_REGION")
+	Ω(endpoint).ShouldNot(BeEmpty(), "must specify $S3_ENDPOINT")
 
 	awsConfig := s3resource.NewAwsConfig(
 		accessKeyID,
 		secretAccessKey,
 		regionName,
 		endpoint,
+		false,
 		false,
 	)
 

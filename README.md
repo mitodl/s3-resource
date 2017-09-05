@@ -52,12 +52,13 @@ version numbers.
 * `disable_ssl`: *Optional.* Disable SSL for the endpoint, useful for S3
   compatible providers without SSL.
 
+* `skip_ssl_verification`: *Optional.* Skip SSL verification for S3 endpoint. Useful for S3 compatible providers using self-signed SSL certificates.
+
 * `server_side_encryption`: *Optional.* An encryption algorithm to use when
   storing objects in S3.
 
 * `sse_kms_key_id`: *Optional.* The ID of the AWS KMS master encryption key
   used for the object.
-
 
 * `use_v2_signing`: *Optional.* Use signature v2 signing, useful for S3 compatible providers that do not support v4.
 
@@ -101,7 +102,7 @@ Places the following files in the destination:
 
 #### Parameters
 
-*None.*
+* `unpack`: *Optional.* If true and the file is an archive (tar, gzipped tar, other gzipped file, or zip), unpack the file. Gzipped tarballs will be both ungzipped and untarred.
 
 
 ### `out`: Upload an object to the bucket.
@@ -121,10 +122,15 @@ a new version of that file.
 
 * `acl`: *Optional.*  [Canned Acl](http://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html)
   for the uploaded object.
+  
+* `content_type`: *Optional.* MIME [Content-Type](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17)
+  describing the contents of the uploaded object
 
 ## Example Configuration
 
 ### Resource
+
+When the file has the version name in the filename
 
 ``` yaml
 - name: release
@@ -132,6 +138,20 @@ a new version of that file.
   source:
     bucket: releases
     regexp: directory_on_s3/release-(.*).tgz
+    access_key_id: ACCESS-KEY
+    secret_access_key: SECRET
+```
+
+or
+
+When the file is being [versioned by s3](http://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html)
+
+``` yaml
+- name: release
+  type: s3
+  source:
+    bucket: releases
+    versioned_file: directory_on_s3/release.tgz
     access_key_id: ACCESS-KEY
     secret_access_key: SECRET
 ```
@@ -153,18 +173,24 @@ a new version of that file.
 
 ### Non-versioned Buckets
 
+The bucket itself (e.g. `"arn:aws:s3:::your-bucket"`):
+* `s3:ListBucket`
+
+The objects in the bucket (e.g. `"arn:aws:s3:::your-bucket/*"`):
 * `s3:PutObject`
 * `s3:PutObjectAcl`
 * `s3:GetObject`
-* `s3:ListBucket`
 
 ### Versioned Buckets
 
 Everything above and...
 
-* `s3:GetBucketVersioning`
-* `s3:GetObjectVersion`
+The bucket itself (e.g. `"arn:aws:s3:::your-bucket"`):
 * `s3:ListBucketVersions`
+* `s3:GetBucketVersioning`
+
+The objects in the bucket (e.g. `"arn:aws:s3:::your-bucket/*"`):
+* `s3:GetObjectVersion`
 * `s3:PutObjectVersionAcl`
 
 ## Developing on this resource

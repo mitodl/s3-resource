@@ -1,11 +1,15 @@
 package s3resource
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
+
+	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -82,6 +86,7 @@ func NewAwsConfig(
 	regionName string,
 	endpoint string,
 	disableSSL bool,
+	skipSSLVerification bool,
 ) *aws.Config {
 	var creds *credentials.Credentials
 
@@ -105,12 +110,22 @@ func NewAwsConfig(
 		regionName = "us-east-1"
 	}
 
+	var httpClient *http.Client
+	if skipSSLVerification {
+		httpClient = &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}}
+	} else {
+		httpClient = http.DefaultClient
+	}
+
 	awsConfig := &aws.Config{
 		Region:           aws.String(regionName),
 		Credentials:      creds,
 		S3ForcePathStyle: aws.Bool(true),
 		MaxRetries:       aws.Int(maxRetries),
 		DisableSSL:       aws.Bool(disableSSL),
+		HTTPClient:       httpClient,
 	}
 
 	if len(endpoint) != 0 {
@@ -164,6 +179,11 @@ func (client *s3client) BucketFileVersions(bucketName string, remotePath string)
 func (client *s3client) UploadFile(bucketName string, remotePath string, localPath string, options UploadFileOptions) (string, error) {
 	uploader := s3manager.NewUploader(client.session)
 
+	if client.isGCSHost() {
+		// GCS returns `InvalidArgument` on multipart uploads
+		uploader.MaxUploadParts = 1
+	}
+
 	stat, err := os.Stat(localPath)
 	if err != nil {
 		return "", err
@@ -184,7 +204,7 @@ func (client *s3client) UploadFile(bucketName string, remotePath string, localPa
 	uploadInput := s3manager.UploadInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(remotePath),
-		Body:   progressSeekReaderAt{localFile, progress},
+		Body:   progressReader{localFile, progress},
 		ACL:    aws.String(options.Acl),
 	}
 	if options.ServerSideEncryption != "" {
@@ -422,4 +442,8 @@ func (client *s3client) newProgressBar(total int64) *pb.ProgressBar {
 	progress.NotPrint = true
 
 	return progress.SetWidth(80)
+}
+
+func (client *s3client) isGCSHost() bool {
+	return (client.session.Config.Endpoint != nil && strings.Contains(*client.session.Config.Endpoint, "storage.googleapis.com"))
 }
