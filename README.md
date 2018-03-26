@@ -37,8 +37,9 @@ version numbers.
 * `secret_access_key`: *Optional.* The AWS secret key to use when accessing
   the bucket.
 
-* `session_token`: *Optional.* The AWS STS session token to use when
-  accessing the bucket.
+* `session_token`: *Optional.* The AWS STS session token to use when accessing the bucket.
+
+* `assume_role_arn`: *Optional.* If you are running Concourse on AWS, and would like to assume role after authentication, provide the ARN here.
 
 * `region_name`: *Optional.* The region the bucket is in. Defaults to
   `us-east-1`.
@@ -68,6 +69,16 @@ version numbers.
   used for the object.
 
 * `use_v2_signing`: *Optional.* Use signature v2 signing, useful for S3 compatible providers that do not support v4.
+
+### Authentication
+
+This resource will attempt to authenticate with these methods in order:
+
+1. `access_key_id` and `secret_access_key`
+2. `session_token`
+3. EC2Role (implicit)
+
+If `assume_role` is provided, it will then attempt to assume role using the above credentials that are valid.
 
 ### File Names
 
@@ -125,7 +136,7 @@ Places the following files in the destination:
 
 #### Parameters
 
-* `unpack`: *Optional.* If true and the file is an archive (tar, gzipped tar, other gzipped file, or zip), unpack the file. Gzipped tarballs will be both ungzipped and untarred. It is ignored when `get` is running on the initial version.
+* `unpack`: *Optional.* If true and the file is an archive (tar, gzipped tar, other gzipped file, or zip), unpack the file. Gzipped tarballs will be both ungzipped and untarred.
 
 
 ### `out`: Upload an object to the bucket.
@@ -219,7 +230,7 @@ The objects in the bucket (e.g. `"arn:aws:s3:::your-bucket/*"`):
 ## Developing on this resource
 
 First get the resource via:
-`go get github.com/alphagov/paas-s3-resource`
+`go get github.com/concourse/s3-resource`
 
 ## Development
 
