@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/alphagov/paas-s3-resource"
-	"github.com/alphagov/paas-s3-resource/out"
+	"github.com/concourse/s3-resource"
+	"github.com/concourse/s3-resource/out"
 )
 
 func main() {
@@ -14,21 +14,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	var request out.Request
+	var request out.OutRequest
 	inputRequest(&request)
 
 	sourceDir := os.Args[1]
 
-	awsConfig := s3resource.NewAwsConfig(
-		request.Source.AccessKeyID,
-		request.Source.SecretAccessKey,
-		request.Source.SessionToken,
-		request.Source.RegionName,
-		request.Source.Endpoint,
-		request.Source.DisableSSL,
-		request.Source.SkipSSLVerification,
-		request.Source.AwsRoleArn,
-	)
+	b := s3resource.AwsConfigBuilder{
+		AccessKey: request.Source.AccessKeyID,
+		SecretKey: request.Source.SecretAccessKey,
+		SessionToken: request.Source.SessionToken,
+		RegionName: request.Source.RegionName,
+		Endpoint: request.Source.Endpoint,
+		DisableSSL: request.Source.DisableSSL,
+		SkipSSLVerification: request.Source.SkipSSLVerification,
+		AssumeRoleArn: request.Source.AssumeRoleArn,
+	}
+
+	awsConfig := b.Build()
 
 	client := s3resource.NewS3Client(
 		os.Stderr,
@@ -36,7 +38,7 @@ func main() {
 		request.Source.UseV2Signing,
 	)
 
-	command := out.NewCommand(os.Stderr, client)
+	command := out.NewOutCommand(os.Stderr, client)
 	response, err := command.Run(sourceDir, request)
 	if err != nil {
 		s3resource.Fatal("running command", err)
@@ -45,13 +47,13 @@ func main() {
 	outputResponse(response)
 }
 
-func inputRequest(request *out.Request) {
+func inputRequest(request *out.OutRequest) {
 	if err := json.NewDecoder(os.Stdin).Decode(request); err != nil {
 		s3resource.Fatal("reading request from stdin", err)
 	}
 }
 
-func outputResponse(response out.Response) {
+func outputResponse(response out.OutResponse) {
 	if err := json.NewEncoder(os.Stdout).Encode(response); err != nil {
 		s3resource.Fatal("writing response to stdout", err)
 	}
