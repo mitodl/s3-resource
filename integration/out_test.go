@@ -57,18 +57,19 @@ var _ = Describe("out", func() {
 	})
 
 	Context("with a versioned_file and a regex", func() {
-		var outRequest out.OutRequest
+		var outRequest out.Request
 
 		BeforeEach(func() {
-			outRequest = out.OutRequest{
+			outRequest = out.Request{
 				Source: s3resource.Source{
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
+					SessionToken:    sessionToken,
 					Bucket:          versionedBucketName,
 					RegionName:      regionName,
+					Endpoint:        endpoint,
 					Regexp:          "some-regex",
 					VersionedFile:   "some-file",
-					Endpoint:        endpoint,
 				},
 			}
 
@@ -87,10 +88,11 @@ var _ = Describe("out", func() {
 		BeforeEach(func() {
 			ioutil.WriteFile(filepath.Join(sourceDir, "content-typed-file"), []byte("text only"), 0755)
 
-			outRequest := out.OutRequest{
+			outRequest := out.Request{
 				Source: s3resource.Source{
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
+					SessionToken:    sessionToken,
 					Bucket:          bucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -129,10 +131,11 @@ var _ = Describe("out", func() {
 		BeforeEach(func() {
 			ioutil.WriteFile(filepath.Join(sourceDir, "uncontent-typed-file"), []byte("text only"), 0755)
 
-			outRequest := out.OutRequest{
+			outRequest := out.Request{
 				Source: s3resource.Source{
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
+					SessionToken:    sessionToken,
 					Bucket:          bucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -169,10 +172,11 @@ var _ = Describe("out", func() {
 
 	Context("with a file glob and from", func() {
 		BeforeEach(func() {
-			outRequest := out.OutRequest{
+			outRequest := out.Request{
 				Source: s3resource.Source{
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
+					SessionToken:    sessionToken,
 					Bucket:          bucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -214,10 +218,11 @@ var _ = Describe("out", func() {
 				err := ioutil.WriteFile(filepath.Join(sourceDir, "glob-file-to-upload"), []byte("contents"), 0755)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				outRequest := out.OutRequest{
+				outRequest := out.Request{
 					Source: s3resource.Source{
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
+						SessionToken:    sessionToken,
 						Bucket:          bucketName,
 						RegionName:      regionName,
 						Endpoint:        endpoint,
@@ -246,11 +251,11 @@ var _ = Describe("out", func() {
 
 				reader := bytes.NewBuffer(session.Buffer().Contents())
 
-				var response out.OutResponse
+				var response out.Response
 				err = json.NewDecoder(reader).Decode(&response)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				Ω(response).Should(Equal(out.OutResponse{
+				Ω(response).Should(Equal(out.Response{
 					Version: s3resource.Version{
 						Path: filepath.Join(directoryPrefix, "glob-file-to-upload"),
 					},
@@ -292,10 +297,11 @@ var _ = Describe("out", func() {
 				err := ioutil.WriteFile(filepath.Join(sourceDir, "file-to-upload"), []byte("contents"), 0755)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				outRequest := out.OutRequest{
+				outRequest := out.Request{
 					Source: s3resource.Source{
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
+						SessionToken:    sessionToken,
 						Bucket:          bucketName,
 						RegionName:      regionName,
 						Endpoint:        endpoint,
@@ -318,11 +324,11 @@ var _ = Describe("out", func() {
 
 				reader := bytes.NewBuffer(session.Out.Contents())
 
-				var response out.OutResponse
+				var response out.Response
 				err = json.NewDecoder(reader).Decode(&response)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				Ω(response).Should(Equal(out.OutResponse{
+				Ω(response).Should(Equal(out.Response{
 					Version: s3resource.Version{
 						Path: filepath.Join(directoryPrefix, "file-to-upload"),
 					},
@@ -345,10 +351,11 @@ var _ = Describe("out", func() {
 				err := ioutil.WriteFile(filepath.Join(sourceDir, "file-to-upload-local"), []byte("contents"), 0755)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				outRequest := out.OutRequest{
+				outRequest := out.Request{
 					Source: s3resource.Source{
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
+						SessionToken:    sessionToken,
 						Bucket:          bucketName,
 						RegionName:      regionName,
 						VersionedFile:   filepath.Join(directoryPrefix, "file-to-upload"),
@@ -394,10 +401,11 @@ var _ = Describe("out", func() {
 				err := ioutil.WriteFile(filepath.Join(sourceDir, "file-to-upload-local"), []byte("contents"), 0755)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				outRequest := out.OutRequest{
+				outRequest := out.Request{
 					Source: s3resource.Source{
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
+						SessionToken:    sessionToken,
 						Bucket:          versionedBucketName,
 						RegionName:      regionName,
 						VersionedFile:   filepath.Join(directoryPrefix, "file-to-upload"),
@@ -421,14 +429,14 @@ var _ = Describe("out", func() {
 
 				reader := bytes.NewBuffer(session.Out.Contents())
 
-				var response out.OutResponse
+				var response out.Response
 				err = json.NewDecoder(reader).Decode(&response)
 				Ω(err).ShouldNot(HaveOccurred())
 
 				versions, err := s3client.BucketFileVersions(versionedBucketName, filepath.Join(directoryPrefix, "file-to-upload"))
 				Ω(err).ShouldNot(HaveOccurred())
 
-				Ω(response).Should(Equal(out.OutResponse{
+				Ω(response).Should(Equal(out.Response{
 					Version: s3resource.Version{
 						VersionID: versions[0],
 					},
@@ -451,10 +459,11 @@ var _ = Describe("out", func() {
 				err := ioutil.WriteFile(filepath.Join(sourceDir, "file-to-upload"), []byte("contents"), 0755)
 				Ω(err).ShouldNot(HaveOccurred())
 
-				outRequest := out.OutRequest{
+				outRequest := out.Request{
 					Source: s3resource.Source{
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
+						SessionToken:    sessionToken,
 						Bucket:          versionedBucketName,
 						RegionName:      regionName,
 						Endpoint:        endpoint,
@@ -477,14 +486,14 @@ var _ = Describe("out", func() {
 
 				reader := bytes.NewBuffer(session.Out.Contents())
 
-				var response out.OutResponse
+				var response out.Response
 				err = json.NewDecoder(reader).Decode(&response)
 				Ω(err).ShouldNot(HaveOccurred())
 
 				versions, err := s3client.BucketFileVersions(versionedBucketName, filepath.Join(directoryPrefix, "file-to-upload"))
 				Ω(err).ShouldNot(HaveOccurred())
 
-				Ω(response).Should(Equal(out.OutResponse{
+				Ω(response).Should(Equal(out.Response{
 					Version: s3resource.Version{
 						Path: filepath.Join(directoryPrefix, "file-to-upload"),
 					},
