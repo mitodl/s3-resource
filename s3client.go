@@ -83,6 +83,7 @@ func NewS3Client(
 func NewAwsConfig(
 	accessKey string,
 	secretKey string,
+	sessionToken string,
 	regionName string,
 	endpoint string,
 	disableSSL bool,
@@ -103,7 +104,7 @@ func NewAwsConfig(
 			creds = credentials.AnonymousCredentials
 		}
 	} else {
-		creds = credentials.NewStaticCredentials(accessKey, secretKey, "")
+		creds = credentials.NewStaticCredentials(accessKey, secretKey, sessionToken)
 	}
 
 	if len(regionName) == 0 {
@@ -177,7 +178,7 @@ func (client *s3client) BucketFileVersions(bucketName string, remotePath string)
 }
 
 func (client *s3client) UploadFile(bucketName string, remotePath string, localPath string, options UploadFileOptions) (string, error) {
-	uploader := s3manager.NewUploader(client.session)
+	uploader := s3manager.NewUploaderWithClient(client.client)
 
 	if client.isGCSHost() {
 		// GCS returns `InvalidArgument` on multipart uploads
@@ -195,8 +196,18 @@ func (client *s3client) UploadFile(bucketName string, remotePath string, localPa
 	}
 
 	defer localFile.Close()
+	
+	// Automatically adjust partsize for larger files.
+	fSize := stat.Size()
+	if fSize > int64(uploader.MaxUploadParts) * uploader.PartSize {
+		partSize := fSize / int64(uploader.MaxUploadParts)
+		if fSize % int64(uploader.MaxUploadParts) != 0 {
+			partSize++
+		}
+		uploader.PartSize = partSize
+	}
 
-	progress := client.newProgressBar(stat.Size())
+	progress := client.newProgressBar(fSize)
 
 	progress.Start()
 	defer progress.Finish()
@@ -246,7 +257,7 @@ func (client *s3client) DownloadFile(bucketName string, remotePath string, versi
 
 	progress := client.newProgressBar(*object.ContentLength)
 
-	downloader := s3manager.NewDownloader(client.session)
+	downloader := s3manager.NewDownloaderWithClient(client.client)
 
 	localFile, err := os.Create(localPath)
 	if err != nil {
