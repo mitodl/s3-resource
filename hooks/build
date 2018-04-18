@@ -1,0 +1,4 @@
+#!/bin/bash
+set -eu
+
+docker build --target resource -f "${DOCKERFILE_PATH}" -t "${IMAGE_NAME}" .
