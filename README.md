@@ -72,15 +72,7 @@ version numbers.
 
 * `use_v2_signing`: *Optional.* Use signature v2 signing, useful for S3 compatible providers that do not support v4.
 
-### Authentication
-
-This resource will attempt to authenticate with these methods in order:
-
-1. `access_key_id` and `secret_access_key`
-2. `session_token`
-3. EC2 Role (if concourse is running on AWS)
-
-If `assume_role` is provided, it will then attempt to assume role using the above credentials that are valid.
+* `disable_multipart`: *Optional.* Disable Multipart Upload. useful for S3 compatible providers that do not support multipart upload.
 
 ### File Names
 
