@@ -1,16 +1,22 @@
-FROM golang:1.12-alpine3.9 as builder
-COPY . /go/src/github.com/alphagov/paas-s3-resource
+FROM concourse/golang-builder as builder
+COPY . /go/src/github.com/concourse/s3-resource
 ENV CGO_ENABLED 0
-RUN go build -o /assets/in github.com/alphagov/paas-s3-resource/cmd/in
-RUN go build -o /assets/out github.com/alphagov/paas-s3-resource/cmd/out
-RUN go build -o /assets/check github.com/alphagov/paas-s3-resource/cmd/check
-WORKDIR /go/src/github.com/alphagov/paas-s3-resource
+RUN go build -o /assets/in github.com/concourse/s3-resource/cmd/in
+RUN go build -o /assets/out github.com/concourse/s3-resource/cmd/out
+RUN go build -o /assets/check github.com/concourse/s3-resource/cmd/check
+WORKDIR /go/src/github.com/concourse/s3-resource
 RUN set -e; for pkg in $(go list ./...); do \
 		go test -o "/tests/$(basename $pkg).test" -c $pkg; \
 	done
 
-FROM alpine:edge AS resource
-RUN apk add --no-cache bash tzdata ca-certificates unzip zip gzip tar
+FROM ubuntu:bionic AS resource
+RUN apt-get update \
+      && apt-get install -y --no-install-recommends \
+        tzdata \
+        ca-certificates \
+        unzip \
+        zip \
+      && rm -rf /var/lib/apt/lists/*
 COPY --from=builder assets/ /opt/resource/
 RUN chmod +x /opt/resource/*
 
