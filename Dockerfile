@@ -1,4 +1,4 @@
-FROM golang:alpine as builder
+FROM golang:1.12-alpine3.9 as builder
 COPY . /go/src/github.com/concourse/s3-resource
 ENV CGO_ENABLED 0
 RUN go build -o /assets/in github.com/concourse/s3-resource/cmd/in
