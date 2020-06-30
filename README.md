@@ -213,6 +213,7 @@ The objects in the bucket (e.g. `"arn:aws:s3:::your-bucket/*"`):
 * `s3:PutObject`
 * `s3:PutObjectAcl`
 * `s3:GetObject`
+* `s3:GetObjectTagging` (if using the `download_tags` option)
 
 ### Versioned Buckets
 
@@ -225,6 +226,7 @@ The bucket itself (e.g. `"arn:aws:s3:::your-bucket"`):
 The objects in the bucket (e.g. `"arn:aws:s3:::your-bucket/*"`):
 * `s3:GetObjectVersion`
 * `s3:PutObjectVersionAcl`
+* `s3:GetObjectVersionTagging` (if using the `download_tags` option)
 
 ## Developing on this resource
 
@@ -280,6 +282,10 @@ docker build . -t s3-resource -f dockerfiles/ubuntu/Dockerfile \
   --build-arg S3_TESTING_REGION="us-east-1" \
   --build-arg S3_ENDPOINT="https://s3.amazonaws.com"
 ```
+
+##### Required IAM permissions
+
+In addition to the required permissions above, the `s3:PutObjectTagging` permission is required to run integration tests.
 
 ### Contributing
 
