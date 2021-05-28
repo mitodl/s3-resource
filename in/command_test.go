@@ -15,10 +15,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/concourse/s3-resource"
-	. "github.com/concourse/s3-resource/in"
+	"github.com/alphagov/paas-s3-resource"
+	. "github.com/alphagov/paas-s3-resource/in"
 
-	"github.com/concourse/s3-resource/fakes"
+	"github.com/alphagov/paas-s3-resource/fakes"
 )
 
 var _ = Describe("In Command", func() {

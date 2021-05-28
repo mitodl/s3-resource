@@ -20,7 +20,7 @@ var _ = BeforeSuite(func() {
 	if _, err = os.Stat("/opt/resource/out"); err == nil {
 		outPath = "/opt/resource/out"
 	} else {
-		outPath, err = gexec.Build("github.com/concourse/s3-resource/cmd/out")
+		outPath, err = gexec.Build("github.com/alphagov/paas-s3-resource/cmd/out")
 		Ω(err).ShouldNot(HaveOccurred())
 	}
 

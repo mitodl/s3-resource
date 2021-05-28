@@ -6,7 +6,7 @@ implemented upstream][issue] at the moment, but the Concourse team are
 looking at other ways to retrieve credentials in the future.
 
 [IAM]: http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#use-roles-with-ec2
-[issue]: https://github.com/concourse/s3-resource/pull/22
+[issue]: https://github.com/alphagov/paas-s3-resource/pull/22
 
 Please do not add additional features or bug fixes to this fork/branch
 without first talking to the Tech Lead or Tech Architect on the Government
@@ -215,7 +215,7 @@ The objects in the bucket (e.g. `"arn:aws:s3:::your-bucket/*"`):
 ## Developing on this resource
 
 First get the resource via:
-`go get github.com/concourse/s3-resource`
+`go get github.com/alphagov/paas-s3-resource`
 
 ## Development
 

@@ -21,7 +21,7 @@ var _ = BeforeSuite(func() {
 	if _, err = os.Stat("/opt/resource/in"); err == nil {
 		inPath = "/opt/resource/in"
 	} else {
-		inPath, err = gexec.Build("github.com/concourse/s3-resource/cmd/in")
+		inPath, err = gexec.Build("github.com/alphagov/paas-s3-resource/cmd/in")
 		Ω(err).ShouldNot(HaveOccurred())
 	}
 

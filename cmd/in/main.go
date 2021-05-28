@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/concourse/s3-resource"
-	"github.com/concourse/s3-resource/in"
+	"github.com/alphagov/paas-s3-resource"
+	"github.com/alphagov/paas-s3-resource/in"
 )
 
 func main() {

@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/concourse/s3-resource",
+	"ImportPath": "github.com/alphagov/paas-s3-resource",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v79",
 	"Packages": [

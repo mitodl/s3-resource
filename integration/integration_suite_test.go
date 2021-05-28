@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/concourse/s3-resource"
+	"github.com/alphagov/paas-s3-resource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
@@ -49,7 +49,7 @@ func findOrCreate(binName string) string {
 	if _, err := os.Stat(resourcePath); err == nil {
 		return resourcePath
 	} else {
-		path, err := gexec.Build("github.com/concourse/s3-resource/cmd/" + binName)
+		path, err := gexec.Build("github.com/alphagov/paas-s3-resource/cmd/" + binName)
 		Ω(err).ShouldNot(HaveOccurred())
 		return path
 	}
