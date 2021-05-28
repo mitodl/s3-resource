@@ -27,6 +27,10 @@ version numbers.
 
 * `bucket`: *Required.* The name of the bucket.
 
+* `aws_role_arn`: *Optional.* The AWS role ARN to use when accessing the
+  bucket. Can be used with `access_key_id` and `secret_access_key` or
+  an EC2 instance role.
+
 * `access_key_id`: *Optional.* The AWS access key to use when accessing the
   bucket.
 
@@ -250,6 +254,22 @@ Run the tests with the following command:
 
 ```sh
 docker build . -t s3-resource --build-arg S3_TESTING_ACCESS_KEY_ID="access-key" --build-arg S3_TESTING_SECRET_ACCESS_KEY="some-secret" --build-arg S3_TESTING_BUCKET="bucket-non-versioned" --build-arg S3_VERSIONED_TESTING_BUCKET="bucket-versioned" --build-arg S3_TESTING_REGION="us-east-1" --build-arg S3_ENDPOINT="https://s3.amazonaws.com"
+```
+
+This resource also supports assuming a role. Here's how you test that:
+
+1. Create an additional S3 bucket named e.g. "role-restricted-bucket"
+1. Create an IAM user
+1. Create an IAM role named e.g. "unrestricted-role"
+1. Give the IAM user permission to assume the IAM role
+1. Give the IAM role full access to the buckets `S3_TESTING_BUCKET`,
+   `S3_VERSIONED_TESTING_BUCKET`, and `S3_ROLE_RESTRICTED_TESTING_BUCKET`.
+
+Add these args to the `docker build` command above.
+
+```
+--build-arg S3_ROLE_RESTRICTED_TESTING_BUCKET="role-restricted-bucket"
+--build-arg S3_TESTING_AWS_ROLE_ARN="unrestricted-role"
 ```
 
 ### Contributing

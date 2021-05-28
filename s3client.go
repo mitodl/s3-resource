@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -88,6 +89,7 @@ func NewAwsConfig(
 	endpoint string,
 	disableSSL bool,
 	skipSSLVerification bool,
+	awsRoleArn string,
 ) *aws.Config {
 	var creds *credentials.Credentials
 
@@ -105,6 +107,14 @@ func NewAwsConfig(
 		}
 	} else {
 		creds = credentials.NewStaticCredentials(accessKey, secretKey, sessionToken)
+	}
+
+	if awsRoleArn != "" {
+		sesh := session.Must(session.NewSession(&aws.Config{
+			Region:      &regionName,
+			Credentials: creds,
+		}))
+		creds = stscreds.NewCredentials(sesh, awsRoleArn)
 	}
 
 	if len(regionName) == 0 {
@@ -196,7 +206,7 @@ func (client *s3client) UploadFile(bucketName string, remotePath string, localPa
 	}
 
 	defer localFile.Close()
-	
+
 	// Automatically adjust partsize for larger files.
 	fSize := stat.Size()
 	if fSize > int64(uploader.MaxUploadParts) * uploader.PartSize {

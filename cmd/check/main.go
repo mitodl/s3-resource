@@ -20,6 +20,7 @@ func main() {
 		request.Source.Endpoint,
 		request.Source.DisableSSL,
 		request.Source.SkipSSLVerification,
+		request.Source.AwsRoleArn,
 	)
 
 	client := s3resource.NewS3Client(

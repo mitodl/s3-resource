@@ -110,4 +110,17 @@ var _ = Describe("S3client", func() {
 			Ω(err).ShouldNot(HaveOccurred())
 		})
 	})
+
+	Context("when using a roleArn", func() {
+		BeforeEach(func() {
+			if os.Getenv("S3_TESTING_AWS_ROLE_ARN") == "" || os.Getenv("S3_ROLE_RESTRICTED_TESTING_BUCKET") == "" {
+				Skip("'S3_TESTING_AWS_ROLE_ARN' or 'S3_ROLE_RESTRICTED_TESTING_BUCKET' is not set, skipping.")
+			}
+		})
+
+		It("can interact with buckets only available to the provided role", func() {
+			_, err := s3client.BucketFiles(roleRestrictedBucketName, directoryPrefix)
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+	})
 })

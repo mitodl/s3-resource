@@ -22,9 +22,11 @@ func TestIntegration(t *testing.T) {
 }
 
 var useInstanceProfile = os.Getenv("S3_USE_INSTANCE_PROFILE")
+var awsRoleArn = os.Getenv("S3_TESTING_AWS_ROLE_ARN")
 var accessKeyID = os.Getenv("S3_TESTING_ACCESS_KEY_ID")
 var secretAccessKey = os.Getenv("S3_TESTING_SECRET_ACCESS_KEY")
 var sessionToken = os.Getenv("S3_TESTING_SESSION_TOKEN")
+var roleRestrictedBucketName = os.Getenv("S3_ROLE_RESTRICTED_TESTING_BUCKET")
 var versionedBucketName = os.Getenv("S3_VERSIONED_TESTING_BUCKET")
 var bucketName = os.Getenv("S3_TESTING_BUCKET")
 var regionName = os.Getenv("S3_TESTING_REGION")
@@ -81,6 +83,7 @@ func getSessionTokenS3Client(awsConfig *aws.Config) (*s3.S3, s3resource.S3Client
 		endpoint,
 		false,
 		false,
+		awsRoleArn,
 	)
 	s3Service := s3.New(session.New(newAwsConfig), newAwsConfig)
 	s3client := s3resource.NewS3Client(ioutil.Discard, newAwsConfig, v2signing == "true")
@@ -116,6 +119,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		Ω(secretAccessKey).ShouldNot(BeEmpty(), "must specify $S3_TESTING_SECRET_ACCESS_KEY")
 	}
 
+	if awsRoleArn != "" {
+		Ω(roleRestrictedBucketName).ShouldNot(BeEmpty(), "must specify $S3_ROLE_RESTRICTED_TESTING_BUCKET")
+	}
+
 	if accessKeyID != "" || useInstanceProfile != "" {
 		Ω(versionedBucketName).ShouldNot(BeEmpty(), "must specify $S3_VERSIONED_TESTING_BUCKET")
 		Ω(bucketName).ShouldNot(BeEmpty(), "must specify $S3_TESTING_BUCKET")
@@ -130,6 +137,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 			endpoint,
 			false,
 			false,
+			awsRoleArn,
 		)
 
 		s3Service = s3.New(session.New(awsConfig), awsConfig)
