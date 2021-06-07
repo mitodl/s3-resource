@@ -1,7 +1,7 @@
 package out
 
 import (
-	"github.com/concourse/s3-resource"
+	"github.com/alphagov/paas-s3-resource"
 )
 
 type Request struct {

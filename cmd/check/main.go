@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/concourse/s3-resource"
-	"github.com/concourse/s3-resource/check"
+	"github.com/alphagov/paas-s3-resource"
+	"github.com/alphagov/paas-s3-resource/check"
 )
 
 func main() {
@@ -20,6 +20,7 @@ func main() {
 		request.Source.Endpoint,
 		request.Source.DisableSSL,
 		request.Source.SkipSSLVerification,
+		request.Source.AwsRoleArn,
 	)
 
 	client := s3resource.NewS3Client(

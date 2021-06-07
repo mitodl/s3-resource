@@ -9,7 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/concourse/s3-resource"
+	"github.com/alphagov/paas-s3-resource"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -107,6 +107,19 @@ var _ = Describe("S3client", func() {
 
 		It("can interact with buckets", func() {
 			_, err := s3client.BucketFiles(versionedBucketName, directoryPrefix)
+			Ω(err).ShouldNot(HaveOccurred())
+		})
+	})
+
+	Context("when using a roleArn", func() {
+		BeforeEach(func() {
+			if os.Getenv("S3_TESTING_AWS_ROLE_ARN") == "" || os.Getenv("S3_ROLE_RESTRICTED_TESTING_BUCKET") == "" {
+				Skip("'S3_TESTING_AWS_ROLE_ARN' or 'S3_ROLE_RESTRICTED_TESTING_BUCKET' is not set, skipping.")
+			}
+		})
+
+		It("can interact with buckets only available to the provided role", func() {
+			_, err := s3client.BucketFiles(roleRestrictedBucketName, directoryPrefix)
 			Ω(err).ShouldNot(HaveOccurred())
 		})
 	})
