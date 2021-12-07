@@ -41,6 +41,9 @@ version numbers.
 
 * `assume_role_arn`: *Optional.* To assume role after authentication, provide the role ARN here.
 
+* `assume_role`: *Optional.* The AWS role ARN to be assumed by the user
+  identified by `access_key_id` and `secret_access_key`.
+
 * `region_name`: *Optional.* The region the bucket is in. Defaults to
   `us-east-1`.
 
