@@ -66,6 +66,7 @@ var _ = Describe("out", func() {
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
 					SessionToken:    sessionToken,
+					AssumeRole:      assumeRole,
 					Bucket:          versionedBucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -94,6 +95,7 @@ var _ = Describe("out", func() {
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
 					SessionToken:    sessionToken,
+					AssumeRole:      assumeRole,
 					Bucket:          bucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -137,6 +139,7 @@ var _ = Describe("out", func() {
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
 					SessionToken:    sessionToken,
+					AssumeRole:      assumeRole,
 					Bucket:          bucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -178,6 +181,7 @@ var _ = Describe("out", func() {
 					AccessKeyID:     accessKeyID,
 					SecretAccessKey: secretAccessKey,
 					SessionToken:    sessionToken,
+					AssumeRole:      assumeRole,
 					Bucket:          bucketName,
 					RegionName:      regionName,
 					Endpoint:        endpoint,
@@ -224,6 +228,7 @@ var _ = Describe("out", func() {
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
 						SessionToken:    sessionToken,
+						AssumeRole:      assumeRole,
 						Bucket:          bucketName,
 						RegionName:      regionName,
 						Endpoint:        endpoint,
@@ -293,6 +298,50 @@ var _ = Describe("out", func() {
 			})
 		})
 
+		Context("with a large file that is multiple of MaxUploadParts", func() {
+			BeforeEach(func() {
+				path := filepath.Join(sourceDir, "large-file-to-upload")
+
+				// touch the file
+				file, err := os.Create(path)
+				Ω(err).NotTo(HaveOccurred())
+				Ω(file.Close()).To(Succeed())
+
+				Ω(os.Truncate(path, s3manager.MinUploadPartSize*s3manager.MaxUploadParts)).To(Succeed())
+
+				outRequest := out.Request{
+					Source: s3resource.Source{
+						AccessKeyID:     accessKeyID,
+						SecretAccessKey: secretAccessKey,
+						SessionToken:    sessionToken,
+						AssumeRole:      assumeRole,
+						Bucket:          bucketName,
+						RegionName:      regionName,
+						Endpoint:        endpoint,
+					},
+					Params: out.Params{
+						File: "large-file-to-upload",
+						To:   directoryPrefix + "/",
+					},
+				}
+
+				err = json.NewEncoder(stdin).Encode(&outRequest)
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+
+			AfterEach(func() {
+				err := s3client.DeleteFile(bucketName, filepath.Join(directoryPrefix, "large-file-to-upload"))
+				Ω(err).ShouldNot(HaveOccurred())
+			})
+
+			It("uploads the file to the correct bucket and outputs the version", func() {
+				s3files, err := s3client.BucketFiles(bucketName, directoryPrefix)
+				Ω(err).ShouldNot(HaveOccurred())
+
+				Ω(s3files).Should(ConsistOf(filepath.Join(directoryPrefix, "large-file-to-upload")))
+			})
+		})
+
 		Context("with regexp", func() {
 			BeforeEach(func() {
 				err := ioutil.WriteFile(filepath.Join(sourceDir, "file-to-upload"), []byte("contents"), 0755)
@@ -303,6 +352,7 @@ var _ = Describe("out", func() {
 						AccessKeyID:     accessKeyID,
 						SecretAccessKey: secretAccessKey,
 						SessionToken:    sessionToken,
+						AssumeRole:      assumeRole,
 						Bucket:          bucketName,
 						RegionName:      regionName,
 						Endpoint:        endpoint,
