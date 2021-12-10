@@ -41,7 +41,7 @@ version numbers.
 
 * `assume_role_arn`: *Optional.* To assume role after authentication, provide the role ARN here.
 
-* `assume_role`: *Optional.* The AWS role ARN to be assumed by the user
+* `aws_role_arn`: *Optional.* The AWS role ARN to be assumed by the user
   identified by `access_key_id` and `secret_access_key`.
 
 * `region_name`: *Optional.* The region the bucket is in. Defaults to
@@ -282,7 +282,7 @@ docker build . -t s3-resource --target tests -f dockerfiles/ubuntu/Dockerfile \
 
 ##### Integration tests using role assumption
 
-If `S3_TESTING_ASSUME_ROLE` is set to a roleARN, this role will be assumed for accessing
+If `S3_TESTING_AWS_ROLE_ARN` is set to a role ARN, this role will be assumed for accessing
 the S3 bucket during integration tests. The whole integration test suite runs either
 completely using role assumption or completely by direct access via the credentials.
 
